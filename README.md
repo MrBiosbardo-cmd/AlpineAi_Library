@@ -1,15 +1,23 @@
-# AlpineAI Research Library
+# AlpineAi_Library
 
-A structured, evidence-ranked knowledge library powering the Alpine AI cycling coach.
+Pipeline-only rebuild of the Alpine AI research library.
 
-## Layer 3
+## Goal
+Drop PDFs into `data/raw/PDF_RAW/`, process them, and keep only the pipeline, indexes, and small metadata in Git.
 
-- `longitudinal_data_model.py` accumulates rider-specific history for ATL/CTL/TSB, CP/W', durability, HR decoupling, RPE drift, compliance, and progression tracking.
+## Folder contract
+- `data/raw/PDF_RAW/` — input PDFs
+- `data/processed/PDF_PROCESSED/` — processed outputs and regenerated artifacts
+- `scripts/` — ingestion, review, and maintenance scripts
+- `chat_interface/` — chat UI and server
+- `README.md` — this guide
 
-## Layer 4
+## Workflow
+1. Put a PDF into `data/raw/PDF_RAW/`.
+2. Run the import pipeline.
+3. The pipeline generates processed outputs in `data/processed/PDF_PROCESSED/`.
+4. Commit only code, config, indexes, and metadata.
+5. Keep PDFs and large derived data out of Git.
 
-- `training_plan_generator.py` builds phase-aware, low-resource-friendly weekly plans with conservative defaults, rule citations, and confidence notes when onboarding data is sparse.
-- `plan_adaptation_engine.py` revises those plans in real time when sessions are missed, stress rises, performance drops, or health status changes.
-- `fatigue_overreaching_detector.py` scores converging fatigue signals and escalates to the coach when risk becomes moderate or high.
-
-## Folder Structure
+## Why this structure
+This repo is intentionally lean so the pipeline can improve over time without carrying archive baggage or Windows path-limit issues.

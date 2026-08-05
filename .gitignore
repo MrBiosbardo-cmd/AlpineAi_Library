@@ -1,10 +1,7 @@
-# Local content
 /data/raw/PDF_RAW/
 /data/processed/PDF_PROCESSED/
 __pycache__/
 *.pyc
 *.pyo
 *.log
-
-# Editor
 .vscode/
