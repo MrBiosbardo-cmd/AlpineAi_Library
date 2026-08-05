@@ -1,0 +1,36 @@
+# AlpineAi Library — Pipeline Configuration
+
+pipeline:
+  # Directory (outside the repo) where source PDFs are stored.
+  # Set via environment variable ALPINEAI_SOURCE_DIR or override here.
+  source_dir: "${ALPINEAI_SOURCE_DIR}"
+
+  # Where intermediate and index files are written (relative to repo root).
+  index_dir: "index"
+
+  # Stage toggles — set to false to skip a stage during re-runs.
+  stages:
+    intake: true
+    extract_metadata: true
+    review_queue: true
+    generate_index: true
+    quality_score: true
+
+review:
+  # When true, all records are automatically approved without human review.
+  # Recommended: false for production ingestion.
+  approve_all: false
+
+  # Flags that should block automatic approval.
+  blocking_flags:
+    - missing_title
+    - duplicate_sha256
+
+quality:
+  # Minimum score (0–100) for a record to appear in the slim index.
+  min_score_for_slim: 50
+
+logging:
+  level: "INFO"
+  # Set to a file path to also log to disk, e.g. "logs/pipeline.log"
+  file: null

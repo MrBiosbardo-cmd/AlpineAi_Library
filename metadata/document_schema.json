@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AlpineAi Library Document Metadata",
+  "description": "Schema for a single document record in the AlpineAi Library index.",
+  "type": "object",
+  "required": ["filename", "relative_path", "size_bytes", "sha256", "intake_timestamp"],
+  "properties": {
+    "filename": {
+      "type": "string",
+      "description": "Basename of the PDF file."
+    },
+    "relative_path": {
+      "type": "string",
+      "description": "Path to the PDF relative to the configured source directory."
+    },
+    "size_bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "File size in bytes."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hex digest of the PDF file contents."
+    },
+    "intake_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp when the file was added to the intake queue."
+    },
+    "title": {
+      "type": "string",
+      "description": "Document title extracted from PDF metadata."
+    },
+    "author": {
+      "type": "string",
+      "description": "Author(s) extracted from PDF metadata."
+    },
+    "subject": {
+      "type": "string",
+      "description": "Subject field from PDF metadata."
+    },
+    "keywords": {
+      "type": "string",
+      "description": "Keywords field from PDF metadata."
+    },
+    "page_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of pages in the document."
+    },
+    "extraction_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp when metadata was extracted."
+    },
+    "review_flags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["missing_title", "zero_page_count", "duplicate_sha256"]
+      },
+      "description": "Flags raised during the review stage."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "extracted", "needs_review", "approved"],
+      "description": "Current pipeline stage of this record."
+    },
+    "quality_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Automated quality score (0–100) assigned in Stage 5."
+    }
+  },
+  "additionalProperties": false
+}
