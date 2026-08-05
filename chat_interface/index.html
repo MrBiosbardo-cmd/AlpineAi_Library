@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alpine AI Library Chat</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #0f1117;
+        color: #e0e0e0;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        background: #1a1d27;
+        padding: 16px 24px;
+        border-bottom: 1px solid #2a2d3e;
+        text-align: center;
+      }
+
+      header h1 {
+        font-size: 1.3rem;
+        color: #7eb8f7;
+        letter-spacing: 1px;
+      }
+
+      header p {
+        font-size: 0.78rem;
+        color: #666;
+        margin-top: 4px;
+      }
+
+      .chat-container {
+        display: flex;
+        flex: 1;
+        gap: 12px;
+        padding: 16px;
+        overflow: hidden;
+      }
+
+      .chat-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #1a1d27;
+        border-radius: 12px;
+        border: 1px solid #2a2d3e;
+        overflow: hidden;
+      }
+
+      .panel-header {
+        padding: 12px 16px;
+        background: #20243a;
+        border-bottom: 1px solid #2a2d3e;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #7eb8f7;
+      }
+
+      .panel-header span {
+        font-weight: 400;
+        color: #555;
+        font-size: 0.75rem;
+        display: block;
+        margin-top: 2px;
+      }
+
+      .panel-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+        font-size: 0.72rem;
+        color: #9fb6d9;
+      }
+
+      .pill {
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #22253a;
+        border: 1px solid #2e3250;
+      }
+
+      .messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .message {
+        max-width: 85%;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+
+      .message.user {
+        background: #2a5caa;
+        color: #fff;
+        align-self: flex-end;
+        border-bottom-right-radius: 2px;
+      }
+
+      .message.assistant {
+        background: #22253a;
+        color: #dce8ff;
+        align-self: flex-start;
+        border-bottom-left-radius: 2px;
+        border: 1px solid #2e3250;
+      }
+
+      .message.thinking {
+        color: #555;
+        font-style: italic;
+        background: none;
+        border: none;
+        padding: 4px 0;
+      }
+
+      .input-area {
+        display: flex;
+        padding: 12px;
+        border-top: 1px solid #2a2d3e;
+        gap: 8px;
+        background: #1a1d27;
+      }
+
+      .input-area textarea {
+        flex: 1;
+        background: #0f1117;
+        border: 1px solid #2a2d3e;
+        border-radius: 8px;
+        color: #e0e0e0;
+        padding: 10px 12px;
+        font-size: 0.87rem;
+        resize: none;
+        outline: none;
+        height: 48px;
+        font-family: inherit;
+      }
+
+      .input-area textarea:focus {
+        border-color: #4a7fd4;
+      }
+
+      .input-area button {
+        background: #2a5caa;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0 18px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: background 0.2s;
+      }
+
+      .input-area button:hover {
+        background: #3a70c8;
+      }
+
+      .input-area button:disabled {
+        background: #333;
+        cursor: not-allowed;
+      }
+
+      .messages::-webkit-scrollbar {
+        width: 5px;
+      }
+      .messages::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .messages::-webkit-scrollbar-thumb {
+        background: #2a2d3e;
+        border-radius: 4px;
+      }
+
+      @media (max-width: 760px) {
+        body {
+          height: auto;
+        }
+
+        .chat-container {
+          flex-direction: column;
+          overflow: visible;
+          padding: 10px;
+        }
+
+        .chat-panel {
+          min-height: 70dvh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Alpine AI Library</h1>
+      <p>Powered by Alpie Core - alpie-32b</p>
+    </header>
+
+    <div class="chat-container">
+      <!-- BOX 1: Quick Research -->
+      <div class="chat-panel" id="panel-box1">
+        <div class="panel-header">
+          Quick Research
+          <span>Ask short, focused questions from the library</span>
+        </div>
+        <div class="messages" id="messages-box1" role="log" aria-live="polite"></div>
+        <div class="input-area">
+          <textarea
+            id="input-box1"
+            placeholder="Ask a question..."
+            aria-label="Quick research question"
+            maxlength="10000"
+            onkeydown="handleKey(event, 'box1')"
+          ></textarea>
+          <button id="btn-box1" onclick="sendMessage('box1')">Send</button>
+        </div>
+      </div>
+
+      <!-- BOX 2: Deep Analysis -->
+      <div class="chat-panel" id="panel-box2">
+        <div class="panel-header">
+          Deep Analysis
+          <span>Cross-reference and analyse across multiple sources</span>
+          <div class="panel-meta">
+            <span class="pill">Coach insight</span>
+            <span class="pill">Risk flags</span>
+            <span class="pill">Plan rationale</span>
+          </div>
+        </div>
+        <div class="messages" id="messages-box2" role="log" aria-live="polite"></div>
+        <div class="input-area">
+          <textarea
+            id="input-box2"
+            placeholder="Ask for a deep dive..."
+            aria-label="Deep analysis question"
+            maxlength="10000"
+            onkeydown="handleKey(event, 'box2')"
+          ></textarea>
+          <button id="btn-box2" onclick="sendMessage('box2')">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const histories = { box1: [], box2: [] };
+      const maxHistoryEntries = 40;
+
+      const coachSummaries = {
+        box2: {
+          profile: {
+            compliance_rate: "unknown",
+            rolling_atl: "unknown",
+            rolling_ctl: "unknown",
+            rolling_tsb: "unknown",
+            durability_index: "unknown",
+            hr_decoupling_trend: "unknown",
+            rpe_delta_trend: "unknown",
+          },
+          risk_level: "unknown",
+          risk_score: 0,
+          confidence: 0.0,
+          signals: [],
+          rule_citations: [],
+          coach_actions: [
+            "Ask what has made adherence difficult.",
+            "Check whether the rider needs a simpler plan.",
+            "Review fatigue and recovery before adding load.",
+          ],
+        },
+      };
+
+      function handleKey(event, boxId) {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage(boxId);
+        }
+      }
+
+      function appendMessage(boxId, role, text) {
+        const container = document.getElementById(`messages-${boxId}`);
+        const div = document.createElement("div");
+        div.className = `message ${role}`;
+        div.textContent = text;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+        return div;
+      }
+
+      async function sendMessage(boxId) {
+        const input = document.getElementById(`input-${boxId}`);
+        const button = document.getElementById(`btn-${boxId}`);
+        const message = input.value.trim();
+        if (!message || button.disabled) return;
+
+        input.value = "";
+        input.disabled = true;
+        button.disabled = true;
+
+        appendMessage(boxId, "user", message);
+        const thinkingDiv = appendMessage(
+          boxId,
+          "thinking",
+          "Alpie is searching the library...",
+        );
+        let assistantDiv;
+
+        try {
+          const response = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: message,
+              history: histories[boxId],
+              box: boxId,
+              coach_summary: coachSummaries[boxId] || null,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+            throw new Error(errorBody.error || `Request failed (${response.status}).`);
+          }
+          if (!response.body) {
+            throw new Error("The server returned an empty response.");
+          }
+
+          thinkingDiv.remove();
+
+          assistantDiv = appendMessage(boxId, "assistant", "");
+          let fullResponse = "";
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+          let streamDone = false;
+
+          function processEvent(eventText) {
+            for (const line of eventText.split("\n")) {
+              if (!line.startsWith("data:")) continue;
+
+              const data = line.slice(5).trimStart();
+              if (data === "[DONE]") {
+                streamDone = true;
+                return;
+              }
+
+              const parsed = JSON.parse(data);
+              if (parsed.error) throw new Error(parsed.error);
+              if (typeof parsed.text !== "string") continue;
+
+              fullResponse += parsed.text;
+              assistantDiv.textContent = fullResponse;
+              assistantDiv.parentElement.scrollTop =
+                assistantDiv.parentElement.scrollHeight;
+            }
+          }
+
+          while (!streamDone) {
+            const { done, value } = await reader.read();
+            buffer += decoder.decode(value, { stream: !done });
+            const events = buffer.split(/\r?\n\r?\n/);
+            buffer = events.pop() || "";
+
+            for (const eventText of events) {
+              processEvent(eventText);
+              if (streamDone) break;
+            }
+
+            if (done) break;
+          }
+
+          if (buffer.trim() && !streamDone) processEvent(buffer);
+          if (!fullResponse) throw new Error("The model returned no answer.");
+
+          histories[boxId].push({ role: "user", content: message });
+          histories[boxId].push({ role: "assistant", content: fullResponse });
+          if (histories[boxId].length > maxHistoryEntries) {
+            histories[boxId].splice(0, histories[boxId].length - maxHistoryEntries);
+          }
+        } catch (err) {
+          thinkingDiv.remove();
+          if (assistantDiv && !assistantDiv.textContent) assistantDiv.remove();
+          const errorMessage =
+            err instanceof Error ? err.message : "Unable to complete the request.";
+          appendMessage(boxId, "assistant", errorMessage);
+        } finally {
+          input.disabled = false;
+          button.disabled = false;
+          input.focus();
+        }
+      }
+    </script>
+  </body>
+</html>
